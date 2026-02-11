@@ -11,15 +11,15 @@ import {presentationTool} from 'sanity/presentation'
 import {linkResolver} from './src/linkResolver'
 
 const devOnlyPlugins = [getStartedPlugin()]
-const remoteURL = 'https://combo-+.vercel.app'
+const remoteURL = 'https://combo--experience.vercel.app'
 const localURL = 'http://localhost:3000'
 const previewURL = window.location.hostname === 'localhost' ? localURL : remoteURL
 
 export default defineConfig({
   name: 'default',
-  title: 'Combo +',
+  title: 'Combo Experience',
 
-  projectId: 'k8hpofcg',
+  projectId: 'k95iarb2',
   dataset: 'production',
 
   plugins: [

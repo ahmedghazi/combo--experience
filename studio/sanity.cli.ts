@@ -2,13 +2,13 @@ import {defineCliConfig} from 'sanity/cli'
 
 export default defineCliConfig({
   api: {
-    projectId: 'k8hpofcg',
+    projectId: 'k95iarb2',
     dataset: 'production',
   },
 
-  studioHost: 'backoffice--combo-plus',
+  studioHost: 'backoffice--combo-experience',
   deployment: {
     autoUpdates: true,
-    appId: 'hor98cb1pl3rwgordryc5w8i',
+    appId: 'y481zszuiyijlb8tfh3flnc7',
   },
 })
