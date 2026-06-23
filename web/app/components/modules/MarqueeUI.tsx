@@ -9,11 +9,13 @@ type MarqueeProps = {
 const ModuleMarqueeUI = ({ input }: MarqueeProps) => {
   // console.log(input);
   return (
-    <Marquee
-      text={input.text || ""}
-      backgroundColor={input.backgroundColor || "#FEC81E"}
-      foregroundColor={input.foregroundColor || "#000"}
-    />
+    <section className='module module--marquee-ui'>
+      <Marquee
+        text={input.text || ""}
+        backgroundColor={input.backgroundColor || "#FEC81E"}
+        foregroundColor={input.foregroundColor || "#000"}
+      />
+    </section>
   );
 };
 

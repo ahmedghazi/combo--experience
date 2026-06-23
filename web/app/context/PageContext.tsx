@@ -49,8 +49,8 @@ export const PageContextProvider = (props: PageContextProps) => {
       headerBounding = header.getBoundingClientRect();
 
       document.documentElement.style.setProperty(
-        "--header-height",
-        headerBounding.height + "px"
+        "--header-h",
+        headerBounding.height + "px",
       );
     }
   };

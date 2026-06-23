@@ -1,113 +1,182 @@
-import { gsap } from "gsap";
+import { gsap, Power4 } from "gsap";
 import _ from "lodash";
 
 export function infinitScrollOnePage(
   wrapper: HTMLDivElement,
   items: HTMLElement[],
   direction: string,
-  onScroll: (rotation: number) => void,
+  onScroll: Function,
   rootMargin: boolean,
 ) {
-  let imagesBoundingRect: DOMRect[] = [],
-    wrapY: (value: number) => number,
+  var imagesBoundingRect: any = null,
+    // deltaTotal: number = 0,
+    wrapY: any,
     lerpCache: number = 0,
     rootMarginSize: number = 0,
-    step: number = 0;
+    // isScrolling: boolean = false,
+    // isNotScrolling: boolean = true,
+    // prevDeltaY: number = 0,
+    step = 0;
 
-  if (!wrapper || items.length === 0) return;
+  if (!wrapper) return;
 
-  // --- Listeners ---
   window.addEventListener("resize", _onResize);
 
-  const throttledWheel = _.throttle(_onWheel, 2000, {
-    leading: true,
-    trailing: false,
-  });
-  wrapper.addEventListener("wheel", throttledWheel);
-
+  wrapper.addEventListener(
+    "wheel",
+    _.throttle(_onWheel, 2000, { leading: true, trailing: false }),
+  );
   if (window.innerWidth < 1080) {
     wrapper.addEventListener("touchstart", _onTouch);
   }
-
-  // Initial call
   _onResize();
   _animeIntro();
 
   function _animeIntro() {
-    const nextVal = window.innerHeight - rootMarginSize;
+    const nextVal = (window.innerHeight - rootMarginSize) * 1;
     _animate(nextVal);
   }
-
   function _onResize() {
-    imagesBoundingRect = items.map((article) =>
-      article.getBoundingClientRect(),
-    );
+    imagesBoundingRect = items.map(function (article) {
+      return article.getBoundingClientRect();
+    });
 
-    // Calculate bounds
-    const first = -imagesBoundingRect[0].height;
-    const totalHeight = imagesBoundingRect.reduce(
-      (acc, curr) => acc + curr.height,
-      0,
-    );
-    const last = totalHeight - imagesBoundingRect[0].height;
+    //set range
+    //start pos => minus first height
+    // if (window.innerWidth < 1080) {
+    //   var first = -imagesBoundingRect[0].width;
+    //   //end pos => total width
+    //   var last =
+    //     imagesBoundingRect.reduce(function (
+    //       accumulateur: number,
+    //       current: any
+    //     ) {
+    //       return accumulateur + current.width;
+    //     },
+    //     0) - imagesBoundingRect[0].width;
+    // } else {
+    //   var first = -imagesBoundingRect[0].height;
+    //   //end pos => total height
+    //   var last =
+    //     imagesBoundingRect.reduce(function (
+    //       accumulateur: number,
+    //       current: any
+    //     ) {
+    //       return accumulateur + current.height;
+    //     },
+    //     0) - imagesBoundingRect[0].height;
+    // }
+    var first = -imagesBoundingRect[0].height;
+    //end pos => total height
+    var last =
+      imagesBoundingRect.reduce(function (accumulateur: number, current: any) {
+        return accumulateur + current.height;
+      }, 0) - imagesBoundingRect[0].height;
 
     wrapY = gsap.utils.wrap(first, last);
 
     if (rootMargin) {
       const header = document.querySelector("header");
       if (header) {
-        rootMarginSize = header.getBoundingClientRect().height;
+        const bounding = header.getBoundingClientRect();
+        rootMarginSize = bounding.height;
       }
     }
     step = window.innerHeight - rootMarginSize;
   }
-
-  function _onTouch(e: TouchEvent) {
-    const touch = e.touches[0];
-    const dir = touch.pageX < window.innerWidth / 2 ? -1 : 1;
-    const nextVal = lerpCache + step * dir;
+  // console.log(wrapY);
+  function _onTouch(e: TouchEvent | any) {
+    // console.log(e);
+    const direction = e.pageX < window.innerWidth / 2 ? -1 : 1;
+    const gap = step * direction;
+    const nextVal = lerpCache + gap;
     _animate(nextVal);
   }
 
-  function _onWheel(e: WheelEvent) {
-    const dir = e.deltaY > 0 ? 1 : -1;
-    const nextVal = lerpCache + step * dir;
+  function _onWheel(e: WheelEvent | any) {
+    // console.log({ lerpCache });
+    const direction = e.deltaY > 0 ? 1 : -1;
+    // const step = window.innerHeight - rootMarginSize;
+    const gap = step * direction;
+    const nextVal = lerpCache + gap;
     _animate(nextVal);
   }
 
   function _animate(nextVal: number) {
-    const localStep = window.innerHeight - rootMarginSize;
-    const rotation = (nextVal * 180) / localStep;
-
-    // GSAP 3 syntax: duration is a property in the vars object
-    gsap.to(
-      { val: lerpCache },
-      {
-        val: nextVal,
-        duration: 2, // Adjust duration as needed
-        ease: "power4.inOut",
-        onUpdate: function () {
-          lerpCache = this.targets()[0].val;
-          _update();
-          if (onScroll) onScroll(rotation);
-        },
+    // console.log(rootMarginSize);
+    const step = window.innerHeight - rootMarginSize;
+    const rotation = (nextVal * 180) / step;
+    var obj = { lerpCache: lerpCache };
+    gsap.to(obj, {
+      lerpCache: nextVal,
+      duration: 1,
+      delay: 0,
+      ease: Power4.easeInOut,
+      onUpdate: () => {
+        lerpCache = obj.lerpCache;
+        _update();
+        if (typeof onScroll === "function") onScroll(rotation);
       },
-    );
+    });
   }
 
   function _update() {
-    items.forEach((el, index) => {
+    items.forEach(function (el, index) {
       const lerpCacheByDirection =
         direction === "up" ? lerpCache * -1 : lerpCache;
-
-      let nextY = wrapY(
+      // console.log(lerpCache);
+      // if (window.innerWidth < 1080) {
+      //   // MOBILE
+      //   const nextY: number = wrapY(
+      //     lerpCacheByDirection + index * imagesBoundingRect[index].width
+      //   );
+      //   el.style.transform = "translate3d(" + nextY + "px,0, 0)";
+      //   // if (typeof onScroll === "function") onScroll(nextY);
+      // } else {
+      //   // DESKTOP
+      //   let nextY: number = wrapY(
+      //     lerpCacheByDirection + index * imagesBoundingRect[index].height
+      //   );
+      //   if (rootMargin) nextY += rootMarginSize;
+      //   el.style.transform = "translate3d(0," + nextY + "px, 0)";
+      //   // if (typeof onScroll === "function") onScroll(nextY);
+      // }
+      let nextY: number = wrapY(
         lerpCacheByDirection + index * imagesBoundingRect[index].height,
       );
-
       if (rootMargin) nextY += rootMarginSize;
-
-      el.style.transform = `translate3d(0, ${nextY}px, 0)`;
+      el.style.transform = "translate3d(0," + nextY + "px, 0)";
       el.style.opacity = "1";
     });
   }
+
+  /*
+    for easing scroll
+    */
+  function lerp(start: number, end: number, amt: number) {
+    return (1 - amt) * start + amt * end;
+  }
 }
+
+// const throttle = (callback: Function, delay: number) => {
+//   var wait = false;
+//   return function () {
+//     if (!wait) {
+//       callback();
+//       wait = true;
+//       setTimeout(function () {
+//         wait = false;
+//       }, delay);
+//     }
+//   };
+// };
+
+// const debounce = (callback: Function, delay: number) => {
+//   let timeout: NodeJS.Timeout | undefined;
+//   return function () {
+//     clearTimeout(timeout);
+//     timeout = setTimeout(() => {
+//       callback();
+//     }, delay);
+//   };
+// };
