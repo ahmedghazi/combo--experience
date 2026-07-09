@@ -39,7 +39,7 @@ export const PageContextProvider = (props: PageContextProps) => {
   const _format = () => {
     // const wh = window.innerHeight;
 
-    let vh = window.innerHeight * 0.01;
+    const vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
     // document.documentElement.style.setProperty("--app-height", wh + "px");
 
